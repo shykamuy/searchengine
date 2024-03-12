@@ -74,9 +74,11 @@ ___
 
 ___
 
-## Project setup
-Project is packaged, so you can execute application with query:  
+## Project setup 
+Via powershell:
 ```
+mvn package
+
 java -jar target/searchengine-1.0-snapshot.jar
 ```
 
