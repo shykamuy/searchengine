@@ -15,4 +15,11 @@ public class DefaultController {
     public String index() {
         return "index";
     }
+
+    public String startIndexing() {
+
+
+
+        return null;
+    }
 }
