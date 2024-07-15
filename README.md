@@ -107,7 +107,23 @@ mvn package
 java -jar target/searchengine-1.0-snapshot.jar
 ```
 
-Via docker
+Via docker:
+
+Set *application.yaml*
+
+```yaml
+spring:
+  datasource:
+    username: root
+    password: sqlpassword
+    url: jdbc:mysql://mysqldb:3306/search_engine?useSSL=false&requireSSL=false&allowPublicKeyRetrieval=true
+```
+
+```
+mvn package
+
+docker-compose up
+```
 
 Or via your DE.
 
