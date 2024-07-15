@@ -39,9 +39,6 @@ public class PageService implements CRUDService<PageDto> {
     private static Lemma2PageRepository lemma2PageRepository;
 
 
-
-
-
     public static PageDto mapToPageDto(Page page) {
         PageDto dto = new PageDto();
         dto.setId(page.getId());
@@ -88,24 +85,25 @@ public class PageService implements CRUDService<PageDto> {
     @Override
     public void create(PageDto pageDto) {
         Page page = mapToPageEntity(pageDto);
-        int siteId = pageDto.getSiteId();
-        Site site = siteRepository.findById(siteId).orElseThrow();
+        Long siteId = pageDto.getSiteId();
+        Site site = siteRepository.findById(siteId.intValue()).orElseThrow();
         page.setSiteId(site);
         pageRepository.save(page);
     }
+
     @Override
     public void update(PageDto pageDto) {
         Page page = mapToPageEntity(pageDto);
-        int siteId = pageDto.getSiteId();
-        Site site = siteRepository.findById(siteId).orElseThrow();
+        Long siteId = pageDto.getSiteId();
+        Site site = siteRepository.findById(siteId.intValue()).orElseThrow();
         page.setSiteId(site);
         pageRepository.save(page);
     }
 
     public void update(PageDto currentPage, PageRepository pageRepository, SiteRepository siteRepository) {
         Page page = mapToPageEntity(currentPage);
-        int siteId = currentPage.getSiteId();
-        Site site = siteRepository.findById(siteId).orElseThrow();
+        Long siteId = currentPage.getSiteId();
+        Site site = siteRepository.findById(siteId.intValue()).orElseThrow();
         site.setStatus(Status.INDEXING);
         site.setStatusTime(LocalDateTime.now());
         page.setSiteId(site);
@@ -113,7 +111,7 @@ public class PageService implements CRUDService<PageDto> {
         siteRepository.save(site);
     }
 
-    public Document connectDocument(PageDto currentPage){
+    public Document connectDocument(PageDto currentPage) {
         Document document;
         try {
             Thread.sleep(500);
@@ -130,10 +128,10 @@ public class PageService implements CRUDService<PageDto> {
     public void setLemmasAndIndexes(PageDto currentPage, SiteRepository siteRepository, PageRepository pageRepository,
                                     LemmaRepository lemmaRepository, Lemma2PageRepository l2pRepository, HashMap<String, Integer> lemmaMap) {
 
-        int pageId = pageRepository.getPageIdByUrl(currentPage.getPath());
-        Page page = pageRepository.findById(pageId).orElseThrow();
-        int siteId = page.getSiteId().getId();
-        Site site = siteRepository.findById(siteId).orElseThrow();
+        Long pageId = pageRepository.getPageIdByUrl(currentPage.getPath());
+        Page page = pageRepository.findById(pageId.intValue()).orElseThrow();
+        Long siteId = page.getSiteId().getId();
+        Site site = siteRepository.findById(siteId.intValue()).orElseThrow();
 
         for (Map.Entry<String, Integer> entry : lemmaMap.entrySet()) {
             lemmaRepository.insertOrUpdateLemma(1, entry.getKey(), site.getId());
@@ -152,7 +150,7 @@ public class PageService implements CRUDService<PageDto> {
                     l2p.getLemmaId().setFrequency(l2p.getLemmaId().getFrequency() - 1);
                     l2pRepository.save(l2p);
                 } else {
-                    lemmaRepository.deleteById(l2p.getLemmaId().getId());
+                    lemmaRepository.deleteById(l2p.getLemmaId().getId().intValue());
                 }
             });
             pageRepository.deletePage(page1.getId());
@@ -166,7 +164,7 @@ public class PageService implements CRUDService<PageDto> {
         Document document = connectDocument(pageDto);
         pageDto.setContent(document.toString());
         Page page = PageService.mapToPageEntity(pageDto);
-        page.setSiteId(siteRepository.findById(pageDto.getSiteId()).orElseThrow());
+        page.setSiteId(siteRepository.findById(pageDto.getSiteId().intValue()).orElseThrow());
         pageRepository.save(page);
         String text = document.text();
         LuceneMorphology luceneMorphology = new RussianLuceneMorphology();
@@ -182,14 +180,14 @@ public class PageService implements CRUDService<PageDto> {
             if (!(wordInfo.get(1).equals("МЕЖД") || wordInfo.get(1).equals("СОЮЗ") ||
                     wordInfo.get(1).equals("ПРЕДЛ") || wordInfo.get(1).equals("ЧАСТ") || wordInfo.get(1).contains("МС"))) {
                 word = luceneMorphology.getNormalForms(word).get(0);
-                if(lemmaMap.containsKey(word)) {
+                if (lemmaMap.containsKey(word)) {
                     lemmaMap.put(word, lemmaMap.get(word) + 1);
-                }else {
+                } else {
                     lemmaMap.put(word, 1);
                 }
             }
         });
-        pageDto.setCode(200);
+        pageDto.setCode(200L);
         setLemmasAndIndexes(pageDto, siteRepository, pageRepository, lemmaRepository, l2pRepository, lemmaMap);
     }
 }

@@ -43,7 +43,7 @@ public class SearchService {
     @Autowired
     private Lemma2PageRepository l2pRepository;
 
-    public SearchDto createLemmasFromRequest (String request) throws IOException {
+    public SearchDto createLemmasFromRequest(String request) throws IOException {
         SearchDto searchResponse = new SearchDto();
         String regex = "[^а-яА-Я\s]";
         HashMap<String, Integer> lemmaMap = new HashMap<>();
@@ -66,12 +66,12 @@ public class SearchService {
         return searchResponse;
     }
 
-    public List<LemmaDto> findLemmasInDB (SearchDto dto) {
+    public List<LemmaDto> findLemmasInDB(SearchDto dto) {
         int countPages;
         List<LemmaDto> lemmaDtoList = new ArrayList<>();
         countPages = pageRepository.countPagesBySiteId(dto.getSiteId());
         for (Map.Entry<String, Integer> entry : dto.getLemmaMap().entrySet()) {
-            int frequency;
+            Long frequency;
             List<Lemma> lemmaList = lemmaRepository.findLemmaByWord(entry.getKey());
             for (int i = 0; i < lemmaList.size(); i++) {
                 if (lemmaList.get(i) == null) {
@@ -95,7 +95,7 @@ public class SearchService {
                 }
             }
         }
-        lemmaDtoList.sort(Comparator.comparingInt(LemmaDto::getFrequency));
+        lemmaDtoList.sort(Comparator.comparingLong(LemmaDto::getFrequency));
         dto.setLemmaDtoList(lemmaDtoList);
         return dto.getLemmaDtoList();
     }
@@ -105,7 +105,7 @@ public class SearchService {
         List<PageDto> pageDtoList = new ArrayList<>();
 
         dto.getLemmaDtoList().forEach(lemmaDto -> {
-            pageDtoList.addAll(pageRepository.getPageListByLemmaId(lemmaDto.getId()).stream().map(PageService::mapToPageDto).toList());
+            pageDtoList.addAll(pageRepository.getPageListByLemmaId(lemmaDto.getId().intValue()).stream().map(PageService::mapToPageDto).toList());
         });
         return pageDtoList;
     }
@@ -144,7 +144,7 @@ public class SearchService {
         dto.getPageDtoList().forEach(pageDto -> {
             SearchedPage searchedPage = new SearchedPage();
             searchedPage.setSite(pageDto.getPath().split("/[^w/]")[0]);
-            searchedPage.setSiteName(siteRepository.findById(pageDto.getSiteId()).get().getName());
+            searchedPage.setSiteName(siteRepository.findById(pageDto.getSiteId().intValue()).get().getName());
             URL url = null;
             try {
                 url = new URL(pageDto.getPath());
@@ -166,7 +166,6 @@ public class SearchService {
     }
 
 
-
     private String createSnippet(SearchDto dto, Document document) {
         String snippet = null;
         String highlightedQuery = "<b>" + dto.getQuery() + "</b>";
@@ -182,7 +181,7 @@ public class SearchService {
                 ).trim();
             } catch (StringIndexOutOfBoundsException e) {
                 snippet = text.substring(0, 100) + "...";
-                }
+            }
             if (snippet.length() > 300) {
                 List<String> snippetWords = List.of(snippet.split("\s"));
                 List<String> queryWords = List.of(dto.getQuery().split("\s"));
@@ -194,19 +193,16 @@ public class SearchService {
                         newSnippet.append(snippetWords.get(i)).append(" ");
                     }
                     newSnippet.append("...");
-                }
-                else if (snippetWords.size() < snippetWords.indexOf(queryWords.get(queryWords.size() - 1)) + 10) {
+                } else if (snippetWords.size() < snippetWords.indexOf(queryWords.get(queryWords.size() - 1)) + 10) {
                     for (int i = snippetWords.indexOf(queryWords.get(0)) - 10; i < snippetWords.size() - 1; i++) {
                         newSnippet.append(snippetWords.get(i)).append(" ");
                     }
                     newSnippet.append("...");
-                }
-                else if (0 > snippetWords.indexOf(queryWords.get(0)) - 10) {
-                     for (int i = 0; i < snippetWords.indexOf(queryWords.get(queryWords.size() - 1)); i++) {
-                         newSnippet.append(snippetWords.get(i)).append(" ");
-                     }
-                }
-                else {
+                } else if (0 > snippetWords.indexOf(queryWords.get(0)) - 10) {
+                    for (int i = 0; i < snippetWords.indexOf(queryWords.get(queryWords.size() - 1)); i++) {
+                        newSnippet.append(snippetWords.get(i)).append(" ");
+                    }
+                } else {
                     for (int i = snippetWords.indexOf(queryWords.get(0)) - 10; i < snippetWords.indexOf(queryWords.get(queryWords.size() - 1)) + 10; i++) {
                         newSnippet.append(snippetWords.get(i)).append(" ");
                     }
@@ -215,10 +211,10 @@ public class SearchService {
                 snippet = newSnippet.toString().trim();
             }
             snippet = snippet.replace(dto.getQuery(), highlightedQuery).trim();
-        }
-        else {
+        } else {
             String bodyText = document.body().text();
-            snippet = bodyText.substring(0, 200) + "...";;
+            snippet = bodyText.substring(0, 200) + "...";
+            ;
         }
         return snippet;
     }

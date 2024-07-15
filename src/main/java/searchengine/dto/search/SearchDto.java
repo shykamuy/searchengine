@@ -14,7 +14,7 @@ public class SearchDto {
     private int limit;
     private String site;
     private HashMap<String, Integer> lemmaMap;
-    private int siteId;
+    private Long siteId;
     private List<LemmaDto> lemmaDtoList;
     private List<PageDto> pageDtoList;
 

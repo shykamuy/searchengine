@@ -1,0 +1,29 @@
+version: '3.1'
+
+services:
+
+  mysqldb:
+    image: mysql
+    container_name: mysqldb
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: sqlpassword
+      MYSQL_DATABASE: search_engine
+    networks:
+      - search-engine-network
+
+  search-engine:
+    image: search-engine
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - search-engine-network
+    depends_on:
+      - mysqldb
+    restart: on-failure
+
+
+networks:
+  search-engine-network:

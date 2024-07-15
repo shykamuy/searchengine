@@ -7,13 +7,13 @@ import java.util.List;
 @Data
 public class PageDto {
 
-    private int id;
-    private int siteId;
+    private Long id;
+    private Long siteId;
     private String path;
-    private int code;
+    private Long code;
     private String content;
     private int depth;
-    private float relevance;
-    private float absRelevance;
+    private Float relevance;
+    private Float absRelevance;
     private int counter = 0;
 }

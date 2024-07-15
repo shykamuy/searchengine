@@ -31,7 +31,7 @@ public class Page {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "site_id", referencedColumnName = "id")
@@ -41,7 +41,7 @@ public class Page {
     private String path;
 
     @Column(name = "code", nullable = false)
-    private int code;
+    private Long code;
 
     @Column(name = "content", columnDefinition = "MEDIUMTEXT", nullable = false)
     private String content;

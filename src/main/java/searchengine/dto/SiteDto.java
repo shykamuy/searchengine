@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 public class SiteDto {
 
-    private int id;
+    private Long id;
     private Status status;
     private LocalDateTime statusTime;
     private String url;

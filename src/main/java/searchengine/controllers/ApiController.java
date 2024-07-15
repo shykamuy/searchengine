@@ -1,5 +1,6 @@
 package searchengine.controllers;
 
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,7 @@ import java.util.List;
 
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/api")
 public class ApiController {
     private final StatisticsService statisticsService;
@@ -49,82 +51,74 @@ public class ApiController {
     @Autowired
     private SearchService searchService;
 
-
-    public ApiController(StatisticsService statisticsService) {
-        this.statisticsService = statisticsService;
-    }
-
-
     @GetMapping("/statistics")
     public ResponseEntity<StatisticsResponse> statistics() {
         return ResponseEntity.ok(statisticsService.getStatistics());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity deleteSite(@PathVariable int id) {
+    public ResponseEntity<?> deleteSite(@PathVariable int id) {
         Response response = service.delete(id);
         return response.getError() == null ?
-                new ResponseEntity(response, HttpStatus.OK) :
-                new ResponseEntity(response, HttpStatus.NOT_FOUND);
+                new ResponseEntity<>(response, HttpStatus.OK) :
+                new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
 
-
     @GetMapping
-    public ResponseEntity AddSites() {
+    public ResponseEntity<?> AddSites() {
         if (statisticsService.getSitesList().getSites().size() == 0) {
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         service.addSites(statisticsService.getSitesList());
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @GetMapping("/stopIndexing")
-    public ResponseEntity stopIndexing() {
+    public ResponseEntity<?> stopIndexing() {
         Response response = service.stopIndexing();
         return response.getError() == null ?
-                new ResponseEntity(response, HttpStatus.OK) :
-                new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+                new ResponseEntity<>(response, HttpStatus.OK) :
+                new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
-
 
 
     @GetMapping("/startIndexing")
-    public ResponseEntity startIndexing(){
+    public ResponseEntity<?> startIndexing() {
         Response response = new Response();
         if (!service.siteStatus(statisticsService.getSitesList())) {
             response.setError("В конфигурационном файле не задан список сайтов");
-            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         List<Site> siteList = service.getUnIndexedSites();
         response = service.indexSites(siteList);
-        return new ResponseEntity(response, HttpStatus.OK);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping("/indexPage")
-    public ResponseEntity indexPage(String url) throws IOException {
+    public ResponseEntity<?> indexPage(String url) throws IOException {
         Response response = new Response();
         PageDto pageDto = new PageDto();
         pageDto.setPath(url);
         pageDto.setSiteId(service.getSiteIdByUrl(url));
         if (pageDto.getSiteId() == 0) {
             response.setError("Данная страница находится за пределами сайтов, указанных в конфигурационном файле");
-            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         response.setResult(true);
-        pageDto.setCode(300);
+        pageDto.setCode(300L);
         pageDto.setContent("UNINDEXED");
         pageService.deletePageIfExist(pageDto, pageRepository, lemmaRepository, l2pRepository);
         pageService.createLemmas(pageDto, siteRepository, pageRepository, lemmaRepository, l2pRepository);
-        return new ResponseEntity(response, HttpStatus.CREATED);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @GetMapping("/search{query}{offset}{limit}{site}")
-    public ResponseEntity search(@RequestParam String query, @RequestParam int offset, @RequestParam int limit, @RequestParam(required = false) String site) throws IOException {
+    public ResponseEntity<?> search(@RequestParam String query, @RequestParam int offset, @RequestParam int limit, @RequestParam(required = false) String site) throws IOException {
         if (query.equals("")) {
             SearchResponse sr = new SearchResponse();
             sr.setError("Пустая строка");
-            return new ResponseEntity(sr, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(sr, HttpStatus.BAD_REQUEST);
         }
         SearchDto dto = searchService.createLemmasFromRequest(query);
         dto.setQuery(query);
@@ -135,6 +129,6 @@ public class ApiController {
         System.out.println(dto.getLemmaDtoList());
         dto.setPageDtoList(searchService.findPagesByLemmas(dto));
         dto.setPageDtoList(searchService.countRelevance(dto));
-        return new ResponseEntity(searchService.createSearchResponse(dto), HttpStatus.OK);
+        return new ResponseEntity<>(searchService.createSearchResponse(dto), HttpStatus.OK);
     }
 }

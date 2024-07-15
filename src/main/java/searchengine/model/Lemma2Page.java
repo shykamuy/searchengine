@@ -28,7 +28,7 @@ public class Lemma2Page {
     @Column(name = "id", nullable = false)
     //@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_generator")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "page_id", referencedColumnName = "id")
@@ -40,7 +40,7 @@ public class Lemma2Page {
     private Lemma lemmaId;
 
     @Column(name = "quantity", nullable = false)
-    private float quantity;
+    private Float quantity;
 
 
     @Override

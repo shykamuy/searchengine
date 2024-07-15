@@ -1,9 +1,6 @@
 package searchengine.model;
 
 
-
-
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -36,7 +33,7 @@ public class Site {
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
 
     @Column(columnDefinition = "enum('INDEXING', 'INDEXED', 'FAILED')")

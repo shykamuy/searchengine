@@ -32,28 +32,29 @@ import java.util.concurrent.RecursiveTask;
 public class PageIndexService extends RecursiveTask<PageDto> {
 
 
+    private final SiteRepository siteRepository;
 
-    @Autowired
-    private SiteRepository siteRepository;
-    @Autowired
-    private PageRepository pageRepository;
-    @Autowired
-    private PageService pageService = new PageService();
-    @Autowired
-    private LemmaRepository lemmaRepository;
-    @Autowired
-    private Lemma2PageRepository l2pRepository;
+    private final PageRepository pageRepository;
+
+    private final PageService pageService;
+
+    private final LemmaRepository lemmaRepository;
+
+    private final Lemma2PageRepository l2pRepository;
+
     private PageDto currentPage;
-    private List<PageDto> list;
+    private final List<PageDto> list;
     private static final int MAX_DEPTH = 3;
 
+    @Autowired
     public PageIndexService(List<PageDto> list, SiteRepository siteRepository, PageRepository pageRepository,
-                            LemmaRepository lemmaRepository, Lemma2PageRepository l2pRepository) {
+                            LemmaRepository lemmaRepository, Lemma2PageRepository l2pRepository, PageService pageService) {
         this.list = list;
         this.siteRepository = siteRepository;
         this.pageRepository = pageRepository;
         this.lemmaRepository = lemmaRepository;
         this.l2pRepository = l2pRepository;
+        this.pageService = pageService;
     }
 
     @Override
@@ -63,7 +64,7 @@ public class PageIndexService extends RecursiveTask<PageDto> {
 
         Document document = pageService.connectDocument(currentPage);
 
-        currentPage.setCode(200);
+        currentPage.setCode(200L);
         currentPage.setContent(document.toString());
         currentPage.setSiteId(currentPage.getSiteId());
 
@@ -82,7 +83,7 @@ public class PageIndexService extends RecursiveTask<PageDto> {
 
         pageIndexServiceList.forEach(ForkJoinTask::join);
         if (currentPage.getDepth() == 0) {
-            Site indexedSite = siteRepository.findById(currentPage.getSiteId()).orElseThrow();
+            Site indexedSite = siteRepository.findById(currentPage.getSiteId().intValue()).orElseThrow();
             indexedSite.setStatus(Status.INDEXED);
             indexedSite.setStatusTime(LocalDateTime.now());
             siteRepository.save(indexedSite);
@@ -110,7 +111,7 @@ public class PageIndexService extends RecursiveTask<PageDto> {
                 newPageDto.setDepth(currentPage.getDepth() + 1);
                 childPageDtoList.add(newPageDto);
                 PageIndexService pageIndexService = new PageIndexService(childPageDtoList, siteRepository,
-                        pageRepository, lemmaRepository, l2pRepository);
+                        pageRepository, lemmaRepository, l2pRepository, pageService);
                 pageIndexService.fork();
                 pageIndexServiceList.add(pageIndexService);
 
@@ -134,9 +135,9 @@ public class PageIndexService extends RecursiveTask<PageDto> {
             if (!(wordInfo.get(1).equals("МЕЖД") || wordInfo.get(1).equals("СОЮЗ") ||
                     wordInfo.get(1).equals("ПРЕДЛ") || wordInfo.get(1).equals("ЧАСТ") || wordInfo.get(1).contains("МС"))) {
                 word = luceneMorphology.getNormalForms(word).get(0);
-                if(lemmaMap.containsKey(word)) {
+                if (lemmaMap.containsKey(word)) {
                     lemmaMap.put(word, lemmaMap.get(word) + 1);
-                }else {
+                } else {
                     lemmaMap.put(word, 1);
                 }
             }

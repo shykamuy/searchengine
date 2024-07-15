@@ -2,7 +2,6 @@ package searchengine.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-
 import org.springframework.stereotype.Repository;
 import searchengine.model.Site;
 
@@ -16,5 +15,5 @@ public interface SiteRepository extends JpaRepository<Site, Integer> {
     List<Site> unIndexedUrlList(String status);
 
     @Query(value = "select id from search_engine.site where url = ?1", nativeQuery = true)
-    int siteIdByUrl(String url);
+    Long siteIdByUrl(String url);
 }

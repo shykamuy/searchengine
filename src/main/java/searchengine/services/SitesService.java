@@ -25,7 +25,6 @@ import java.util.concurrent.ForkJoinPool;
 public class SitesService implements CRUDService<SiteDto> {
 
 
-
     @Autowired
     private SiteRepository siteRepository;
     @Autowired
@@ -34,6 +33,10 @@ public class SitesService implements CRUDService<SiteDto> {
     private LemmaRepository lemmaRepository;
     @Autowired
     private Lemma2PageRepository l2pRepository;
+
+    @Autowired
+    private PageService pageService;
+
     private ForkJoinPool forkJoinPool = new ForkJoinPool();
 
     private SitesListConfig sitesList;
@@ -45,8 +48,7 @@ public class SitesService implements CRUDService<SiteDto> {
     }
 
 
-
-    public void addSites(SitesListConfig sitesList){
+    public void addSites(SitesListConfig sitesList) {
         System.out.println(siteRepository.count());
         for (SiteConfig site : sitesList.getSites()) {
             try {
@@ -55,7 +57,7 @@ public class SitesService implements CRUDService<SiteDto> {
                 modelSite.setName(site.getName());
                 Page page = new Page();
                 page.setPath(site.getUrl());
-                page.setCode(300);
+                page.setCode(300L);
                 page.setContent("UNINDEXED");
                 page.setSiteId(modelSite);
                 List<Page> pageList = new ArrayList<>();
@@ -97,12 +99,12 @@ public class SitesService implements CRUDService<SiteDto> {
         return response;
     }
 
-    public int getSiteIdByUrl(String url) {
+    public Long getSiteIdByUrl(String url) {
         url = url.split("/[^w/]")[0] + "/";
         if (siteRepository.siteIdByUrl(url) != 0) {
             return siteRepository.siteIdByUrl(url);
         }
-        return 0;
+        return 0L;
     }
 
 
@@ -136,16 +138,13 @@ public class SitesService implements CRUDService<SiteDto> {
                 site.getPageList().forEach(page -> {
                     pageDtoList.add(PageService.mapToPageDto(page));
                 });
-                forkJoinPool.submit(new PageIndexService(pageDtoList, siteRepository, pageRepository, lemmaRepository, l2pRepository));
+                forkJoinPool.submit(new PageIndexService(pageDtoList, siteRepository, pageRepository, lemmaRepository, l2pRepository, pageService));
                 response.setResult(true);
                 response.setError(null);
             }
         });
         return response;
     }
-
-
-
 
 
     public static SiteDto mapToSiteDto(Site site) {

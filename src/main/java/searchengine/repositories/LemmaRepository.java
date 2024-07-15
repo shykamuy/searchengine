@@ -16,15 +16,17 @@ import java.util.Optional;
 public interface LemmaRepository extends JpaRepository<Lemma, Integer> {
     @Query(value = "SELECT * FROM search_engine.lemma where lemma = :word", nativeQuery = true)
     List<Lemma> findLemmaByWord(@Param("word") String word);
+
     @Query(value = "select count(*) from search_engine.lemma", nativeQuery = true)
     int countLemmas();
+
     @Query(value = "select count(*) from search_engine.lemma where site_id = ?1", nativeQuery = true)
-    int countLemmasBySiteId(int id);
+    int countLemmasBySiteId(Long id);
 
     @Transactional
     @Modifying
     @Query(value = "insert into search_engine.lemma (frequency, lemma, site_id) values (:frequency, :lemma, :siteId) " +
             "on duplicate key update frequency = frequency + 1", nativeQuery = true)
-    int insertOrUpdateLemma(@Param("frequency") int frequency, @Param("lemma") String lemma, @Param("siteId") int siteId);
+    int insertOrUpdateLemma(@Param("frequency") int frequency, @Param("lemma") String lemma, @Param("siteId") Long siteId);
 
 }

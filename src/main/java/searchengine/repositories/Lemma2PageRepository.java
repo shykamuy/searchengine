@@ -17,14 +17,14 @@ public interface Lemma2PageRepository extends JpaRepository<Lemma2Page, Integer>
     @Modifying
     @Query(value =
             "insert into search_engine.l2p (quantity, lemma_id, page_id) values " +
-            "(:quantity, (select id from search_engine.lemma where lemma = :lemma and site_id = :siteId), :pageId)",
+                    "(:quantity, (select id from search_engine.lemma where lemma = :lemma and site_id = :siteId), :pageId)",
             nativeQuery = true)
-    void insertL2P(@Param("quantity")float quantity, @Param("lemma") String lemma, @Param("siteId") int siteId, @Param("pageId") int pageId);
+    void insertL2P(@Param("quantity") int quantity, @Param("lemma") String lemma, @Param("siteId") Long siteId, @Param("pageId") Long pageId);
 
     @Query(value = "select * from search_engine.l2p where page_id = ?1", nativeQuery = true)
-    List<Lemma2Page> getL2PByPageId(int pageId);
+    List<Lemma2Page> getL2PByPageId(Long pageId);
 
     @Query(value = "select quantity from search_engine.l2p where page_id = :pageId and lemma_id = :lemmaId", nativeQuery = true)
-    float getRank(@Param("pageId") int pageId, @Param("lemmaId") int lemmaId);
+    Float getRank(@Param("pageId") Long pageId, @Param("lemmaId") Long lemmaId);
 
 }

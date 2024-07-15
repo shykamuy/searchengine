@@ -2,18 +2,16 @@ package searchengine.dto;
 
 import lombok.Data;
 
-import java.util.List;
-
 @Data
 public class LemmaDto implements Comparable<LemmaDto> {
 
-    private int id;
-    private int siteId;
+    private Long id;
+    private Long siteId;
     private String lemma;
-    private int frequency;
+    private Long frequency;
 
     @Override
     public int compareTo(LemmaDto lemmaDto) {
-        return lemmaDto.frequency - this.frequency;
+        return Long.valueOf(lemmaDto.frequency - this.frequency).intValue();
     }
 }
