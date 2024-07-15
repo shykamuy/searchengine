@@ -1,0 +1,32 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    username: root
+    password: sqlpassword
+    url: jdbc:mysql://localhost:3306/search_engine?useSSL=false&requireSSL=false&allowPublicKeyRetrieval=true
+  jpa:
+    properties:
+      hibernate:
+        jdbc.batch_size: 20
+        order_inserts: true
+        order_updates: true
+        jdbc.batch_versioned_data: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+
+indexing-settings:
+  sites:
+    - url: https://www.playback.ru/
+      name: PlayBack.
+    - url: https://www.et-cetera.ru/mobile/
+      name: ETC.
+    - url: http://www.dimonvideo.ru/
+      name: DimonVideo.
+
+
+
+
